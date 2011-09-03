@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     }
 
     if(!file_exists(argv[1])) {
-        fprintf(stderr, "File doesn't exist, exiting\n");
+        fprintf(stderr, "File '%s' doesn't exist, exiting\n", argv[1]);
         return 1;
     }
 
