@@ -1,0 +1,32 @@
+#!/bin/sh
+
+GPG=/usr/bin/gpg
+
+while getopts "f:" opt; do
+    case $opt in
+        f)
+            FPATH=$OPTARG
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            exit 1
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument" >&2
+            exit 1;
+            ;;
+    esac
+done
+
+if [ -z $FPATH ] ; then
+    echo no file given to decrypt, exiting! >&2
+    exit 1
+elif [ ! -r $FPATH ] ; then
+    echo file $FPATH not readable, exiting! >&2
+    exit 1
+fi
+
+FILENAME=$(basename $FPATH)
+NEWFILENAME=${FILENAME%.*}
+
+gpg -o $NEWFILENAME $FPATH
