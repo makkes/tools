@@ -1,14 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 
 GPG=/usr/bin/gpg
 
-while getopts "f:" opt; do
+while getopts "o:" opt; do
     case $opt in
-        f)
-            FPATH=$OPTARG
+        o)
+            OPATH=$OPTARG
             ;;
         \?)
-            echo "Invalid option: -$OPTARG" >&2
             exit 1
             ;;
         :)
@@ -18,6 +17,8 @@ while getopts "f:" opt; do
     esac
 done
 
+shift $((OPTIND-1))
+FPATH=$1
 if [ -z $FPATH ] ; then
     echo no file given to decrypt, exiting! >&2
     exit 1
@@ -26,7 +27,18 @@ elif [ ! -r $FPATH ] ; then
     exit 1
 fi
 
+if [ ! -z $OPATH ] ; then
+    if  [ ! -d $OPATH ] ; then
+        echo $OPATH is not a directory, exiting! >&2
+        exit 1
+    fi
+else
+    OPATH="."
+fi
+
+OPATH="${OPATH%/}/"
+
 FILENAME=$(basename $FPATH)
 NEWFILENAME=${FILENAME%.*}
 
-gpg -o $NEWFILENAME $FPATH
+gpg -o ${OPATH}${NEWFILENAME} $FPATH
