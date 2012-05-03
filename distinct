@@ -1,0 +1,17 @@
+#!/usr/bin/python
+
+"""distinct counts the occurence of distinct lines from stdin"""
+
+from collections import defaultdict
+import sys
+
+def main():
+    lines = defaultdict(int)
+    for line in sys.stdin:
+        lines[line.rstrip('\n')] += 1
+
+    for line,occurences in lines.iteritems():
+        print str(occurences) + ": " + line
+
+if __name__ == '__main__':
+    main()
