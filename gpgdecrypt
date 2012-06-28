@@ -42,3 +42,5 @@ FILENAME=$(basename $FPATH)
 NEWFILENAME=${FILENAME%.*}
 
 gpg -o ${OPATH}${NEWFILENAME} $FPATH
+
+echo "\n$NEWFILENAME\n"
