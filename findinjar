@@ -1,9 +1,10 @@
 #!/bin/bash
 
-TOFIND=${1//\./\/}\\.class
-for i in `find . -iname "*.jar"` ; do
-	jar tf $i | grep ^$TOFIND$ > /dev/null 2>&1
-	if [[ $? == 0 ]] ; then
-		echo $i
-	fi
-done
+PATTERN=${1//\./\/}
+DIR=$2
+
+if [[ -n $DIR ]] ; then
+    cd $DIR
+fi
+
+for i in *.jar ; do jar tf $i|grep ${PATTERN} && echo $i ; done
