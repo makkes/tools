@@ -1,0 +1,9 @@
+#!/bin/bash
+
+FILE=$(gpgdecrypt $@)
+if [ $? == 1 ] ; then
+    exit 1
+fi
+gnome-open $FILE
+sleep 2
+srm $FILE
