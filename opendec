@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# opendec - decrypt a file, open it and then remove it
+#
+# All parameters are directly passed to gpgdecrypt
 
 FILE=$(gpgdecrypt $@)
 if [ $? == 1 ] ; then

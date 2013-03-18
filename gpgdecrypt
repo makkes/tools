@@ -1,4 +1,9 @@
 #!/bin/sh
+#
+# gpgdecrypt - decrypt a file to a given directory
+#
+# This script is a simple wrapper around gpg(1) that per default decrypts a
+# given file and writes the decrypted file to the CWD.
 
 GPG=/usr/bin/gpg
 
