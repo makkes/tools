@@ -25,6 +25,9 @@ if [ -z $FPATH ] ; then
 elif [ ! -r $FPATH ] ; then
     echo file $FPATH not readable, exiting! >&2
     exit 1
+elif [ ! -f $FPATH ] ; then
+    echo $FPATH is not a file, exiting! >&2
+    exit 1
 fi
 
 if [ ! -z $OPATH ] ; then
@@ -43,4 +46,8 @@ NEWFILENAME=${FILENAME%.*}
 
 gpg -o ${OPATH}${NEWFILENAME} $FPATH
 
-echo "\n$NEWFILENAME\n"
+if [ $? != 0 ] ; then
+    exit 1
+fi
+
+echo "\n${OPATH}${NEWFILENAME}\n"
