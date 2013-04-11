@@ -10,4 +10,4 @@ if [ $? == 1 ] ; then
 fi
 gnome-open $FILE
 sleep 2
-srm $FILE
+srm -v $FILE
