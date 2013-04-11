@@ -1,0 +1,21 @@
+OLD=""
+URL=$1
+
+if [[ -z $URL ]] ; then
+    echo "You must supply a URL to watch as first parameter"
+    exit 1
+fi
+
+diff() {
+    NEW=`curl -s $URL | md5sum`
+    sed -i -e "s/^OLD=.*/OLD=\"$NEW\"/" $0
+    if [[ $OLD == $NEW ]] ; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+if diff ; then
+    echo "New changes available: $URL"
+fi
