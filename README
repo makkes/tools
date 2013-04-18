@@ -1,8 +1,2 @@
 Scripts and small programs that help me get my work done in everyday
 life.
-
-watch-website-changes : checks a given web-site for changes (via MD5 checksum).
-USAGE : watch-website-changes www.reddit.com
-RETURN CODES : 
-  0 = change detected
-  1 = no change
