@@ -1,3 +1,14 @@
+#!/bin/sh
+#
+# watch-website-changes check a web page for changes
+# 
+# Usage:
+# $ watch-website-changes www.reddit.com
+# 
+# Prints nothing when the page hasn't changed, a message and the URL otherwise.
+
+MD5SUM=/usr/bin/md5sum
+CURL=/usr/bin/curl
 OLD=""
 URL=$1
 
@@ -7,7 +18,7 @@ if [[ -z $URL ]] ; then
 fi
 
 diff() {
-    NEW=`curl -s $URL | md5sum`
+    NEW=`curl -s $URL | $MD5SUM`
     sed -i -e "s/^OLD=.*/OLD=\"$NEW\"/" $0
     if [[ $OLD == $NEW ]] ; then
         return 1
