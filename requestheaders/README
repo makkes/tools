@@ -1,0 +1,1 @@
+This nodejs tool is meant to be used as a simple debug tool for investigating received HTTP requests from a browser. The received HTTP method, url and header is printed to console and is send back by the server to the requestor. For usage information type : node server.js --help
