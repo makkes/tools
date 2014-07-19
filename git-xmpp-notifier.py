@@ -2,7 +2,6 @@
 
 import os
 import subprocess
-import time
 import xmpp
 import fileinput
 
@@ -43,4 +42,4 @@ if __name__ == "__main__":
 
         for recipient in recipients:
             send(client, recipient, log)
-            time.sleep(0.1)
+    client.disconnect()
