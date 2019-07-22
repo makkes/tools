@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# This is a very simple template for shell scripts. It sets sane default for
+# This is a very simple template for shell scripts. It sets sane defaults for
 # execution parameters and has boilerplate code for stuff common to most
 # scripts.
 
