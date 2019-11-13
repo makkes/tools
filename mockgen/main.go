@@ -20,9 +20,10 @@ import (
 )
 
 type Method struct {
-	Name string
-	In   []string
-	Out  []string
+	Name     string
+	In       []string
+	Variadic bool
+	Out      []string
 }
 
 func main() {
@@ -38,19 +39,29 @@ func main() {
 			longestFnNameLength = len(m.Name)
 		}
 		method.In = make([]string, m.Type.NumIn())
-		for j := 0; j < m.Type.NumIn(); j++ {
+		numIn := m.Type.NumIn()
+		if m.Type.IsVariadic() {
+			method.Variadic = true
+			numIn--
+		}
+		for j := 0; j < numIn; j++ {
 			param := m.Type.In(j)
-			var path string
-			switch param.Kind() {
-			case reflect.Array, reflect.Chan, reflect.Map, reflect.Ptr, reflect.Slice:
-				path = param.Elem().PkgPath()
-			default:
-				path = param.PkgPath()
-			}
-			if path != "" {
-				imports[path] = true
+			if pkgPath := param.PkgPath(); pkgPath != "" {
+				imports[pkgPath] = true
+			} else {
+				switch param.Kind() {
+				case reflect.Array, reflect.Chan, reflect.Map, reflect.Ptr, reflect.Slice:
+					pkgPath = param.Elem().PkgPath()
+					if pkgPath != "" {
+						imports[pkgPath] = true
+					}
+				}
 			}
 			method.In[j] = param.String()
+		}
+		if m.Type.IsVariadic() {
+			idx := len(method.In)-1
+			method.In[idx] = fmt.Sprintf("...%s", m.Type.In(idx).Elem().String())
 		}
 
 		method.Out = make([]string, m.Type.NumOut())
@@ -77,7 +88,7 @@ func main() {
 	}
 	fmt.Printf(")\n\n")
 
-	fmt.Printf("type Mock struct {\n")
+	fmt.Printf("type {{.MockName}} struct {\n")
 	longestFnNameLength += 12
 	for _, method := range methods {
 		fmt.Printf("\t%sInvocations%sint\n", method.Name, strings.Repeat(" ", longestFnNameLength-len(method.Name)-11))
@@ -92,7 +103,7 @@ func main() {
 	fmt.Printf("}\n")
 
 	for _, method := range methods {
-		fmt.Printf("\nfunc (m *Mock) %s(", method.Name)
+		fmt.Printf("\nfunc (m *{{.MockName}}) %s(", method.Name)
 		for i, param := range method.In {
 			fmt.Printf("p%d %s", i, param)
 			if i < len(method.In)-1 {
@@ -116,6 +127,9 @@ func main() {
 			if i < len(method.In)-1 {
 				fmt.Printf(", ")
 			}
+		}
+		if method.Variadic {
+			fmt.Printf("...")
 		}
 		fmt.Printf(")\n}\n")
 	}
@@ -148,11 +162,13 @@ func main() {
 
 	var program bytes.Buffer
 	template.Must(template.New("program").Parse(programTmpl)).Execute(&program, struct {
-		Pkg  string
-		Type string
+		Pkg      string
+		Type     string
+		MockName string
 	}{
-		Pkg:  os.Args[1],
-		Type: os.Args[2],
+		Pkg:      os.Args[1],
+		Type:     os.Args[2],
+		MockName: os.Args[3],
 	})
 
 	err = ioutil.WriteFile("mocker.go", program.Bytes(), 0600)
