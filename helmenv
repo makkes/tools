@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+bindir=~/bin
+cur=""
+if [ -f ${bindir}/helm ] ; then
+    cur=$(basename "$(readlink -f ${bindir}/helm)" | cut -d"-" -f2)
+fi
+
+i=0
+mapfile -t versions < <(ls -1 ${bindir}/helm-* 2>/dev/null)
+
+if [ ${#versions[@]} == 0 ] ; then
+    echo "No helm binary found in ${bindir}, exiting."
+    exit 1
+fi
+
+for hv in "${versions[@]}" ; do
+    v=$(basename "$hv"|cut -d"-" -f2)
+    echo -n "[${i}] "
+    echo -n "$v"
+    if [[ "$v" == "$cur" ]] ; then
+        echo -n " *"
+    fi
+    echo ""
+    (( ++i ))
+done
+
+echo -n "> "
+read -r sel
+
+if [ -z "${sel}" ] ; then
+    echo "Not changing version, have a nice day!"
+    exit 0
+fi
+
+if [ -z "${versions[$sel]}" ] ; then
+    echo "I don't know that version, exiting"
+    exit 1
+fi
+
+rm -f ${bindir}/helm
+ln -s "${versions[$sel]}" ${bindir}/helm
