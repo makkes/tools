@@ -6,6 +6,7 @@
 # open-files-per-command: lists the number of open files per command that's currently running.
 # wait-for-docker: continuously checks if Docker engine is up and running and exists as soon as it is, playing a notification sound.
 # monitor-connectivity: continuously checks whether the machine has connectivity to the internet and if not plays a notification sound.
+# git-prune-branches: deletes all local branches whose remote tracking branch has gone.
 
 set -euo pipefail
 
@@ -20,6 +21,9 @@ case $CMD in
         ;;
     monitor-connectivity)
         while ( true ) ; do ping -c1 google.com && unset FAILURE || if [[ ! ${FAILURE-} ]] ; then afplay ~/Desktop/cabin_chime.mp3; FAILURE=1; fi; sleep 1 ; done
+        ;;
+    git-prune-branches)
+        git fetch -tpP && git branch -vv|grep ': gone]'|grep -v '^\* '|awk '{print $1}'|xargs -r git branch -D
         ;;
     *)
         echo "Unknown command $CMD"
