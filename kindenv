@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+bindir=~/bin
+cur=""
+if [ -f ${bindir}/kind ] ; then
+    cur=$(basename "$(readlink -f ${bindir}/kind)" | cut -d"-" -f2)
+fi
+
+i=0
+mapfile -t versions < <(ls -1 ${bindir}/kind-* 2>/dev/null)
+
+if [ ${#versions[@]} == 0 ] ; then
+    echo "No kind binary found in ${bindir}, exiting."
+    exit 1
+fi
+
+for kv in "${versions[@]}" ; do
+    v=$(basename "$kv"|cut -d"-" -f2)
+    echo -n "[${i}] "
+    echo -n "$v"
+    if [[ "$v" == "$cur" ]] ; then
+        echo -n " *"
+    fi
+    echo ""
+    (( ++i ))
+done
+
+echo -n "> "
+read -r sel
+
+if [ -z "${sel}" ] ; then
+    echo "Not changing version, have a nice day!"
+    exit 0
+fi
+
+if [ -z "${versions[$sel]}" ] ; then
+    echo "I don't know that version, exiting"
+    exit 1
+fi
+
+rm -f ${bindir}/kind
+ln -s "${versions[$sel]}" ${bindir}/kind
