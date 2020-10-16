@@ -68,6 +68,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	if token == nil {
+		fmt.Fprintf(os.Stderr, "Token is invalid.\n")
+		os.Exit(1)
+	}
 
 	fmt.Printf("Header:\n")
 	for key, val := range token.Header {
