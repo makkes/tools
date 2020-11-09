@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+helm repo add mesosphere-stable https://mesosphere.github.io/charts/stable
+helm repo add mesosphere-staging https://mesosphere.github.io/charts/staging
+
 kind create cluster
 docker cp kind-control-plane:/etc/kubernetes/pki/ca.key .
 docker cp kind-control-plane:/etc/kubernetes/pki/ca.crt .
