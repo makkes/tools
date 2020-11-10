@@ -26,7 +26,7 @@ case $CMD in
         git fetch -tpP && git branch -vv|grep ': gone]'|grep -v '^\* '|awk '{print $1}'|xargs -r git branch -D
         ;;
     kind-with-metallb)
-        kind create cluster && helm upgrade --install -n metallb --create-namespace --set configInline.address-pools[0].name=default --set configInline.address-pools[0].protocol=layer2 --set configInline.address-pools[0].addresses={"172.18.255.1-172.18.255.250"} metallb bitnami/metallb
+        kind create cluster && helm upgrade --install -n metallb --create-namespace --set configInline.address-pools[0].name=default --set configInline.address-pools[0].protocol=layer2 --set configInline.address-pools[0].addresses={"172.18.255.1-172.18.255.250"} metallb bitnami/metallb && helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace
         ;;
     *)
         echo "Unknown command $CMD"
