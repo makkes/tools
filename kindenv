@@ -3,6 +3,59 @@
 set -euo pipefail
 
 bindir=~/bin
+
+function update() {
+    echo "Fetching latest Kind release..."
+    os=$(uname -s)
+    case ${os} in
+        Darwin)
+            os="darwin"
+            ;;
+        Linux)
+            os="linux"
+            ;;
+        *)
+            echo "Unknown operating system ${os}. Can't perform update."
+            return
+            ;;
+    esac
+    arch=$(uname -m)
+    case ${arch} in
+        armv7l)
+            arch=arm
+            ;;
+        aarch64)
+            arch=arm64
+            ;;
+        x86_64)
+            arch=amd64
+            ;;
+        *)
+            echo "Unknown architecture ${arch}. Can't perform update."
+            return
+            ;;
+    esac
+
+    kind_release=$(curl -fs https://api.github.com/repos/kubernetes-sigs/kind/releases/latest)
+    kind_version=$(echo ${kind_release} | jq .tag_name -r)
+    if [ -r ${bindir}/kind-"${kind_version}" ] ; then
+        echo "Latest version ${kind_version} already installed, skipping update."
+        return
+    fi
+    tmpdir=$(mktemp -d)
+    cd "$tmpdir"
+    curl -fsLo kind $(curl -fs https://api.github.com/repos/kubernetes-sigs/kind/releases/latest|jq '.assets[]|select(.name == "kind-'${os}'-'${arch}'").browser_download_url' -r)
+    chmod 0554 kind
+    mv kind ${bindir}/kind-"${kind_version}"
+    rm -rf "${tmpdir}"
+}
+
+case ${1:-} in
+    up|update)
+        update
+        ;;
+esac
+
 cur=""
 if [ -f ${bindir}/kind ] ; then
     cur=$(basename "$(readlink -f ${bindir}/kind)" | cut -d"-" -f2)
