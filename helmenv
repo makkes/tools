@@ -3,6 +3,62 @@
 set -euo pipefail
 
 bindir=~/bin
+
+function update() {
+    echo "Fetching latest Helm release..."
+    os=$(uname -s)
+    case ${os} in
+        Darwin)
+            os="darwin"
+            ;;
+        Linux)
+            os="linux"
+            ;;
+        *)
+            echo "Unknown operating system ${os}. Can't perform update."
+            return
+            ;;
+    esac
+    arch=$(uname -m)
+    case ${arch} in
+        armv7l)
+            arch=arm
+            ;;
+        aarch64)
+            arch=arm64
+            ;;
+        x86_64)
+            arch=amd64
+            ;;
+        *)
+            echo "Unknown architecture ${arch}. Can't perform update."
+            return
+            ;;
+    esac
+
+    helm_version=$(curl -fs https://api.github.com/repos/helm/helm/releases/latest | jq '.tag_name' -r)
+    if [ -x ${bindir}/helm-"${helm_version#v}" ] ; then
+        echo "Latest version ${helm_version} already installed, skipping update."
+        return
+    fi
+    tmpdir=$(mktemp -d)
+    cd "$tmpdir"
+    curl -fo helm.tar.gz https://get.helm.sh/helm-"${helm_version}"-${os}-${arch}.tar.gz
+    tar -xzf helm.tar.gz
+    mv ${os}-${arch}/helm ${bindir}/helm-"${helm_version#v}"
+    rm -rf "${tmpdir}"
+}
+
+case ${1:-} in
+    arm*)
+        echo "ARM"
+        exit 1
+        ;;
+    up|update)
+        update
+        ;;
+esac
+
 cur=""
 if [ -f ${bindir}/helm ] ; then
     cur=$(basename "$(readlink -f ${bindir}/helm)" | cut -d"-" -f2)
