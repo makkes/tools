@@ -50,10 +50,6 @@ function update() {
 }
 
 case ${1:-} in
-    arm*)
-        echo "ARM"
-        exit 1
-        ;;
     up|update)
         update
         ;;
