@@ -4,43 +4,56 @@ set -euo pipefail
 
 bindir=~/bin
 
-function update() {
-    echo "Fetching latest Helm release..."
+function determine_os() {
     os=$(uname -s)
     case ${os} in
         Darwin)
-            os="darwin"
+            echo "darwin"
             ;;
         Linux)
-            os="linux"
+            echo "linux"
             ;;
         *)
-            echo "Unknown operating system ${os}. Can't perform update."
-            return
+            >&2 echo "Unknown operating system ${os}. Can't perform update."
+            exit 1
             ;;
     esac
+}
+
+function determine_arch() {
     arch=$(uname -m)
     case ${arch} in
         armv7l)
-            arch=arm
+            echo "arm"
             ;;
         aarch64)
-            arch=arm64
+            echo "arm64"
             ;;
         x86_64)
-            arch=amd64
+            echo "amd64"
             ;;
         *)
-            echo "Unknown architecture ${arch}. Can't perform update."
-            return
+            >&2 echo "Unknown architecture ${arch}. Can't perform update."
+            exit 1
             ;;
     esac
+}
+
+function update() {
+    echo "Fetching latest Helm release..."
 
     helm_version=$(curl -fs https://api.github.com/repos/helm/helm/releases/latest | jq '.tag_name' -r)
     if [ -x ${bindir}/helm-"${helm_version#v}" ] ; then
         echo "Latest version ${helm_version} already installed, skipping update."
         return
     fi
+    fetch_version ${helm_version}
+}
+
+function fetch_version() {
+    helm_version=${1}
+    os=$(determine_os)
+    arch=$(determine_arch)
     tmpdir=$(mktemp -d)
     cd "$tmpdir"
     curl -fo helm.tar.gz https://get.helm.sh/helm-"${helm_version}"-${os}-${arch}.tar.gz
@@ -49,11 +62,10 @@ function update() {
     rm -rf "${tmpdir}"
 }
 
-case ${1:-} in
-    up|update)
-        update
-        ;;
-esac
+function set_version() {
+    rm -f ${bindir}/helm
+    ln -s "${bindir}/helm-${1}" ${bindir}/helm
+}
 
 cur=""
 if [ -f ${bindir}/helm ] ; then
@@ -61,7 +73,26 @@ if [ -f ${bindir}/helm ] ; then
 fi
 
 i=0
-mapfile -t versions < <(ls -1 ${bindir}/helm-* 2>/dev/null)
+mapfile -t versions < <(for v in ~/bin/helm-* ; do v=$(basename $v); echo ${v#helm-} ; done)
+
+case ${1:-} in
+    up|update)
+        update
+        ;;
+    v*)
+        req=${1#v}
+        for hv in "${versions[@]}" ; do
+            if [[ "${hv}" == "${req}" ]] ; then
+                set_version ${req}
+                echo "set version to ${req}"
+                exit 0
+            fi
+        done
+        fetch_version ${1}
+        set_version ${req}
+        echo "set version to ${req}"
+        exit 0
+esac
 
 if [ ${#versions[@]} == 0 ] ; then
     echo "No helm binary found in ${bindir}, exiting."
@@ -92,5 +123,4 @@ if [ -z "${versions[$sel]}" ] ; then
     exit 1
 fi
 
-rm -f ${bindir}/helm
-ln -s "${versions[$sel]}" ${bindir}/helm
+set_version "${versions[$sel]}"
