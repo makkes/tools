@@ -25,9 +25,8 @@ cmds[git-prune-branches]='git fetch -tpP && git branch -vv|grep ": gone]"|grep -
 cmds[kind-with-metallb]='kind create cluster && helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && helm repo up && helm upgrade --install -n metallb --create-namespace --set configInline.address-pools[0].name=default --set configInline.address-pools[0].protocol=layer2 --set configInline.address-pools[0].addresses={"172.18.255.1-172.18.255.250"} metallb bitnami/metallb && helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace'
 
 function usage() {
-    echo -e "These are the commands I know:\n"
     for cmd in "${!cmds[@]}" ; do
-        echo "$cmd"
+        echo "ln -fs $(readlink -f ${0}) ~/.local/bin/$cmd"
     done
     exit 1
 }
