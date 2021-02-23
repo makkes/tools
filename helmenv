@@ -40,9 +40,8 @@ function determine_arch() {
 }
 
 function update() {
-    echo "Fetching latest Helm release..."
-
     helm_version=$(curl -fs https://api.github.com/repos/helm/helm/releases/latest | jq '.tag_name' -r)
+    echo "Fetching latest Helm release ${helm_version}..."
     if [ -x ${bindir}/helm-"${helm_version#v}" ] ; then
         echo "Latest version ${helm_version} already installed, skipping update."
         return
@@ -72,9 +71,6 @@ if [ -f ${bindir}/helm ] ; then
     cur=$(basename "$(readlink -f ${bindir}/helm)" | cut -d"-" -f2)
 fi
 
-i=0
-mapfile -t versions < <(for v in ~/bin/helm-* ; do v=$(basename $v); echo ${v#helm-} ; done)
-
 case ${1:-} in
     up|update)
         update
@@ -93,6 +89,10 @@ case ${1:-} in
         echo "set version to ${req}"
         exit 0
 esac
+
+i=0
+mapfile -t versions < <(for v in ~/bin/helm-* ; do v=$(basename $v); echo ${v#helm-} ; done)
+
 
 if [ ${#versions[@]} == 0 ] ; then
     echo "No helm binary found in ${bindir}, exiting."
