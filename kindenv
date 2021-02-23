@@ -62,7 +62,7 @@ if [ -f ${bindir}/kind ] ; then
 fi
 
 i=0
-mapfile -t versions < <(ls -1 ${bindir}/kind-* 2>/dev/null)
+mapfile -t versions < <(ls -1 ${bindir}/kind-v*.*.* 2>/dev/null)
 
 if [ ${#versions[@]} == 0 ] ; then
     echo "No kind binary found in ${bindir}, exiting."
