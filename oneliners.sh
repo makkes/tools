@@ -23,10 +23,11 @@ cmds[open-files-per-command]='IFS=$'"'\n'"'; for i in $(ps -A -o pid= -o command
 cmds[monitor-connectivity]='while ! ping -c1 google.com ; do sleep 1 ; done && '${say}" 'connectivity established'"
 cmds[git-prune-branches]='git fetch -tpP && git branch -vv|grep ": gone]"|grep -v "^\* "|awk "{print \$1}"|xargs -r git branch -D'
 cmds[kind-with-metallb]='kind create cluster && helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && helm repo up && helm upgrade --install -n metallb --create-namespace --set configInline.address-pools[0].name=default --set configInline.address-pools[0].protocol=layer2 --set configInline.address-pools[0].addresses={"172.18.255.1-172.18.255.250"} metallb bitnami/metallb && helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace'
+cmds[webp-to-gif]='python3 -c "from PIL import Image; import sys; im = Image.open(sys.argv[1]); im.save(sys.argv[2], '"'"'gif'"'"', save_all=True, optimize=True, background=0)" $1 $2'
 
 function usage() {
     for cmd in "${!cmds[@]}" ; do
-        echo "ln -fs $(readlink -f ${0}) ~/.local/bin/$cmd"
+        echo "ln -fs $(readlink -f "${0}") ~/.local/bin/$cmd"
     done
     exit 1
 }
