@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+function usage() {
+
+    echo "binary=BINARY_NAME" > "$1"
+    echo "repo=GITHUB_REPOSITORY" >> "$1"
+    echo "asset_pattern=ASSET_PATTERN" >> "$1"
+
+    echo "A sample configuration file has been placed in in ${config}"
+    echo "Please fill in the appropriate values in that file."
+    echo "Have a look at the repository's releases page to find out the specific values."
+    exit 1
+}
+
+binary=
+repo=
+asset_pattern=
+asset_download_pattern=
+
+config=~/.$(basename "$0")
+#shellcheck disable=SC1090
+source "$config" 2> /dev/null || usage "$config"
+
+bindir=~/.local/bin
+
+function update() {
+    echo "Fetching latest ${binary} release..."
+    os=$(uname -s)
+    case ${os} in
+        Darwin)
+            os="darwin"
+            ;;
+        Linux)
+            os="linux"
+            ;;
+        *)
+            echo "Unknown operating system ${os}. Can't perform update."
+            return
+            ;;
+    esac
+    arch=$(uname -m)
+    case ${arch} in
+        armv7l)
+            arch=arm
+            ;;
+        aarch64)
+            arch=arm64
+            ;;
+        x86_64)
+            arch=amd64
+            ;;
+        *)
+            echo "Unknown architecture ${arch}. Can't perform update."
+            return
+            ;;
+    esac
+
+    latest_release=$(curl -fs https://api.github.com/repos/${repo}/releases/latest)
+    latest_version=$(echo "${latest_release}" | jq .tag_name -r)
+    if [ -r ${bindir}/${binary}-"${latest_version}" ] ; then
+        echo "Latest version ${latest_version} already installed, skipping update."
+        return
+    fi
+    asset_pattern=${asset_pattern/!!VERSION!!/${latest_version##v}}
+    asset_pattern=${asset_pattern/!!OS!!/${os}}
+    asset_pattern=${asset_pattern/!!ARCH!!/${arch}}
+    tmpdir=$(mktemp -d)
+    cd "$tmpdir"
+    if [ -n "${asset_download_pattern}" ] ; then
+        asset_download_pattern=${asset_download_pattern/!!VERSION!!/${latest_version##v}}
+        asset_download_pattern=${asset_download_pattern/!!OS!!/${os}}
+        asset_download_pattern=${asset_download_pattern/!!ARCH!!/${arch}}
+        curl -fsLo ${binary}.tar.gz ${asset_download_pattern}
+        tar xf ${binary}.tar.gz
+        ls ${binary} > /dev/null 2>&1 || find . -name ${binary} -exec mv {} ${binary} \;
+    elif [ "$(echo "${latest_release}"|jq '.assets[]|select(.name == "'"${asset_pattern}"'").content_type' -r)" == "application/gzip" ] ; then
+        curl -fsLo ${binary}.tar.gz "$(echo "${latest_release}"|jq '.assets[]|select(.name == "'"${asset_pattern}"'").browser_download_url' -r)"
+        tar xf ${binary}.tar.gz
+    else
+        curl -fsLo ${binary} "$(echo "${latest_release}"|jq '.assets[]|select(.name == "'"${asset_pattern}"'").browser_download_url' -r)"
+    fi
+    chmod 0554 ${binary}
+    mv ${binary} ${bindir}/${binary}-"${latest_version}"
+    rm -rf "${tmpdir}"
+}
+
+case ${1:-} in
+    up|update)
+        update
+        ;;
+esac
+
+cur=""
+if [ -f ${bindir}/${binary} ] ; then
+    cur=$(basename "$(readlink -f ${bindir}/${binary})" | cut -d"-" -f2)
+fi
+
+i=0
+mapfile -t versions < <(ls -1v ${bindir}/${binary}-v*.*.* 2>/dev/null)
+
+if [ ${#versions[@]} == 0 ] ; then
+    echo "No ${binary} binary found in ${bindir}, exiting."
+    exit 1
+fi
+
+for kv in "${versions[@]}" ; do
+    v=$(basename "$kv"|cut -d"-" -f2)
+    echo -n "[${i}] "
+    echo -n "$v"
+    if [[ "$v" == "$cur" ]] ; then
+        echo -n " *"
+    fi
+    echo ""
+    (( ++i ))
+done
+
+echo -n "> "
+read -r sel
+
+if [ -z "${sel}" ] ; then
+    echo "Not changing version, have a nice day!"
+    exit 0
+fi
+if ! [[ ${sel} =~ ^[0-9]+$ ]] ; then
+    echo "${sel} is not a number, exiting without changes"
+    exit 1
+fi
+
+if [ -z "${versions[$sel]:-}" ] ; then
+    echo "I don't know that version, exiting"
+    exit 1
+fi
+
+rm -f ${bindir}/${binary}
+ln -s "${versions[$sel]}" ${bindir}/${binary}
