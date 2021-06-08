@@ -1,0 +1,27 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git
+spec:
+  selector:
+    matchLabels:
+      app: gitserver
+  template:
+    metadata:
+      labels:
+        app: gitserver
+    spec:
+      containers:
+        - image: docker.io/makkes/gitserver:v0.1.0
+          name: server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: git
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: gitserver
