@@ -1,4 +1,15 @@
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: git-repository-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 250Mi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,6 +26,16 @@ spec:
       containers:
         - image: docker.io/makkes/gitserver:v0.1.0
           name: server
+          env:
+            - name: BOOTSTRAP_GIT_PASSWORD
+              value: git123
+          volumeMounts:
+            - mountPath: /srv/git
+              name: git-repository-storage
+      volumes:
+        - persistentVolumeClaim:
+            claimName: git-repository-storage
+          name: git-repository-storage
 ---
 apiVersion: v1
 kind: Service
