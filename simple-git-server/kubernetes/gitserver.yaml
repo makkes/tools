@@ -24,7 +24,7 @@ spec:
         app: gitserver
     spec:
       containers:
-        - image: docker.io/makkes/gitserver:v0.1.0
+        - image: docker.io/makkes/gitserver:v0.2.3
           name: server
           env:
             - name: BOOTSTRAP_GIT_PASSWORD
@@ -43,6 +43,6 @@ metadata:
   name: git
 spec:
   ports:
-    - port: 80
+    - port: 443
   selector:
     app: gitserver

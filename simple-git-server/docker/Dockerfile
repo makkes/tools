@@ -1,10 +1,14 @@
 FROM nginx:1.19.7
 
+EXPOSE 443
 RUN apt-get update && \
     apt-get install -y \
         fcgiwrap \
         apache2-utils \
         git
+
+COPY gencerts.sh /etc/ssl/
+RUN cd /etc/ssl && ./gencerts.sh
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY fcgiwrap-entrypoint.sh /docker-entrypoint.d/
