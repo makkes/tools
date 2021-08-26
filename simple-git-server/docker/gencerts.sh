@@ -11,6 +11,6 @@ openssl req \
     -reqexts SAN \
     -extensions SAN \
     -config <(cat /etc/ssl//openssl.cnf \
-        <(printf '[SAN]\nsubjectAltName=DNS:git.default.svc')) \
+        <(printf '[SAN]\nsubjectAltName=DNS:git.default.svc,DNS:localhost')) \
     -sha256 \
     -days 3650
