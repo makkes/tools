@@ -1,4 +1,25 @@
 #!/usr/bin/env bash
+
+#############################################################################
+# start-container-registry-mirror.sh
+#
+# starts a docker container providing a container registry mirror
+#
+# This scripts is useful when creating many Kind Kubernetes clusters in a
+# short period of time e.g. as part of your day-to-day activities. In those
+# cases you start a Docker container providing a registry mirror for
+# docker.io and let kind make use of that (see kind-with-custom-registry.yaml
+# for an example configuration).
+#
+# Example starting a mirror for the ghcr.io container registry:
+#
+# start-container-registry-mirror.sh \
+#   --port 5001 \
+#   --dir ~/.registry/ghcr.io \
+#   --name registry-ghcr \
+#   --proxy https://ghcr.io
+#############################################################################
+
 set -euo pipefail
 
 REGISTRY_PORT=5000
