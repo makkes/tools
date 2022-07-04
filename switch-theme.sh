@@ -11,8 +11,8 @@ case "${1:-}" in
         if [ "${2:-}" = "gtk" ] ; then
             sed -i 's/^gtk-application-prefer-dark-theme=1$/gtk-application-prefer-dark-theme=0/' ~/.config/gtk-{3,4}.0/settings.ini
         fi
-        sed -i 's/^source ~\/.mutt\/mutt-colors-solarized-dark-16\.muttrc$/source ~\/.mutt\/mutt-colors-solarized-light-16.muttrc/' ~/.mutt/muttrc
-        yq -i e '.style = "light"' ~/.config/glow/glow.yml
+        [ -r ~/.mutt/muttrc ] && sed -i 's/^source ~\/.mutt\/mutt-colors-solarized-dark-16\.muttrc$/source ~\/.mutt\/mutt-colors-solarized-light-16.muttrc/' ~/.mutt/muttrc
+        [ -r ~/.config/glow/glow.yml ] && yq -i e '.style = "light"' ~/.config/glow/glow.yml
         ;;
     dark)
         sed -i 's/^"\(set background=dark\)$/\1/' ~/.vim/vimrc_local
