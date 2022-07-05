@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/xerrors"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 )
 
 func getToken(jwtString string, pubKey *rsa.PublicKey) (*jwt.Token, error) {
