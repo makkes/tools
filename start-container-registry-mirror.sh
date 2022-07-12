@@ -112,12 +112,16 @@ if [[ -n ${USERNAME:-} ]] && [[ -n ${PASSWORD:-} ]]; then
 EOF
 fi
 
-echo "Starting registry on port ${REGISTRY_PORT} ${REGISTRY_DIR}"
-
 if ! docker network inspect kind >/dev/null 2>&1 ; then
     docker network create --label registry-proxy kind
-elif [ "$(docker network inspect kind|jq '.[0].Labels["registry-proxy"]')" == "null" ] ; then
-    echo "the kind network doesn't have the registry-proxy label which is needed to exclude it from pruning. Bailing out now."
-    exit 1
+else
+    networkLabel="$(docker network inspect kind|jq '.[0].Labels["registry-proxy"]')"
+    if [ "$networkLabel" == "null" ] ; then
+        echo "the kind network doesn't have the registry-proxy label which is needed to exclude it from pruning. Bailing out now."
+        exit 1
+    fi
 fi
+
+echo "Starting registry on port ${REGISTRY_PORT} ${REGISTRY_DIR}"
+
 docker run -l registry-proxy --network kind -d --restart=always -p "${REGISTRY_PORT}":5000 --name "${REGISTRY_NAME}" -v "${REGISTRY_DIR}":/var/lib/registry registry:2 /var/lib/registry/config.yml
