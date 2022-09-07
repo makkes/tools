@@ -2,7 +2,9 @@
 
 set -euo pipefail
 
-BKPDIR=/media/max/makkes/$(hostname)
+BKPDIR_PREFIX=${BKPDIR_PREFIX:-/media/max/makkes}
+HOSTNAME=$(hostname 2>/dev/null || cat /etc/hostname)
+BKPDIR=${BKPDIR_PREFIX}/${HOSTNAME}
 if [[ -z $(findmnt --target "$BKPDIR") ]] ; then
     echo "Backup drive not mounted, ${BKPDIR} not found; exiting"
     exit
