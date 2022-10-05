@@ -16,4 +16,4 @@ DATESTR=$(date +"%Y-%m-%d_%H:%M:%S")
 LOGFILE=$LOGDIR/bkp-$DATESTR.log
 ERRORLOGFILE=$LOGDIR/bkp-$DATESTR-error.log
 
-rsync --exclude-from="$BASEDIR/backup.excl" -vaxAX --delete --ignore-errors / "$BKPDIR" 2> "$ERRORLOGFILE" | tee "$LOGFILE"
+rsync --exclude-from="$BASEDIR/backup.excl" -vaxAX --delete --ignore-errors / "$BKPDIR" > >(tee "$LOGFILE") 2> >(tee "$ERRORLOGFILE" >&2)
