@@ -29,12 +29,32 @@ REGISTRY_PROXY=https://index.docker.io
 USERNAME=
 PASSWORD=
 
-OPTS=$(getopt -o '' --long 'port:,dir:,name:,proxy:,username:,password:' -- "$@")
+function usage() {
+    echo "Usage: $0 [OPTION]..."
+    echo "Start a docker container providing a container registry mirror".
+    echo
+    echo "  --dir=DIRECTORY     use DIRECTORY on the host for storing registry config and data (default $REGISTRY_DIR)."
+    echo "  -h, --help          display this help and exit"
+    echo "  --port=PORT         use PORT as the registry's host port (default $REGISTRY_PORT)"
+    echo "  --name=NAME         use NAME as the container's name (default $REGISTRY_NAME)"
+    echo "  --proxy=URL         proxy requests to URL (default $REGISTRY_PROXY)"
+    echo "  --username=USERNAME if set and --password is set, use USERNAME for authenticating with the proxied registry (default empty)"
+    echo "  --password=PASSWORD if set and --username is set, use PASSWORD for authenticating with the proxied registry (default empty)"
+}
+
+if ! OPTS=$(getopt -o 'h' --long 'help,port:,dir:,name:,proxy:,username:,password:' -- "$@"); then
+    usage
+    exit 1
+fi
 eval set -- "$OPTS"
 unset OPTS
 
 while true ; do
     case "$1" in
+        '-h'|'--help')
+            usage
+            exit 0
+            ;;
         '--port')
             REGISTRY_PORT="$2"
             shift 2
