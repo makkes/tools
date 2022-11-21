@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Has Flux graduated, yet?</title>
+    <style>
+        .container {
+            width: 100%;
+            text-align: center;
+        }
+
+        .yesno {
+            font-size: 5em;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const p = document.querySelector("#updated")
+            diff = new Date(p.dataset.date) - new Date()
+            var rel
+            const formatter = new Intl.RelativeTimeFormat('en-US', {
+                numeric: 'auto',
+            })
+            const seconds = diff / 1000
+            if (-seconds < 60) {
+                rel = formatter.format(Math.round(seconds), 'second')
+            } else {
+                const minutes = Math.round(seconds / 60)
+                rel = formatter.format(minutes, 'minute')
+            }
+            p.querySelector("span").innerText = rel
+        })
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <p class="yesno">$yesno</p>
+        <p class="voters">+1 from <br/>$voters</p>
+        <p data-date="$lastupdate" id="updated">(this page was last updated <span></span>)</p>
+    </div>
+</body>
+
+</html>
