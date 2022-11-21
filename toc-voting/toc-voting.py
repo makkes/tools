@@ -28,6 +28,8 @@ def req_all(opener, url):
         sys.exit(1)
 
 
+topic_no = os.environ["TOPIC"]
+
 cj = http.cookiejar.CookieJar()
 opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
 login_values = {
@@ -44,7 +46,7 @@ except urllib.error.HTTPError as e:
 
 
 topics = req_all(
-    opener, "https://lists.cncf.io/api/v1/gettopic?topic_id=95047098&limit=10")
+    opener, f"https://lists.cncf.io/api/v1/gettopic?topic_id={topic_no}&limit=10")
 votes = 0
 voters = []
 toc = [
@@ -62,7 +64,7 @@ toc = [
 ]
 for topic in topics:
     snippet = topic["snippet"]
-    if topic["name"] in toc or "+1 binding" in snippet or "+1B" in snippet or "+1b" in snippet or "+1 b" in snippet:
+    if topic["name"] in toc and ("+1" in snippet):
         votes += 1
         voters.append(topic["name"])
         print("+1 from {}".format(topic["name"]))
@@ -71,10 +73,11 @@ with open("toc-voting.html.tmpl") as f:
     tmpl_content = f.read()
 lastupdate = datetime.now(timezone.utc).strftime("%a %b %d %Y %X %Z")
 tmpl = Template(tmpl_content)
-html = tmpl.substitute(yesno="yes" if votes >
+html = tmpl.substitute(yesno="yes" if votes >=
                        8 else "no ({}/{} necessary votes so far)".format(votes, 8),
                        lastupdate=lastupdate,
-                       voters="<br/>".join(voters))
+                       voters="<br/>".join(voters),
+                       topic_no=topic_no)
 try:
     outdir = os.environ["OUTDIR"]
 except KeyError:
