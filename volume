@@ -7,6 +7,10 @@ function get_volume {
 }
 
 function get_icon {
+    if pactl get-sink-mute @DEFAULT_SINK@ | grep -q '^Mute: yes$' ; then
+        echo "audio-volume-muted-symbolic"
+        return
+    fi
     if [ "${1:-0}" -le 20 ] ; then
         echo "audio-volume-low-symbolic"
         return
@@ -18,30 +22,28 @@ function get_icon {
     echo "audio-volume-high-symbolic"
 }
 
+TIMEOUT=1000
+
 case ${1:-} in
     up)
         INC=${2:-5}
         pactl set-sink-volume @DEFAULT_SINK@ "+${INC}%"
         VOL=$(get_volume)
         ICON=$(get_icon "${VOL}")
-        dunstify -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume"
+        dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume"
         ;;
     down)
         INC=${2:-5}
         pactl set-sink-volume @DEFAULT_SINK@ "-${INC}%"
         VOL=$(get_volume)
         ICON=$(get_icon "${VOL}")
-        dunstify -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume"
+        dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume"
         ;;
     mute)
         pactl set-sink-mute @DEFAULT_SINK@ toggle
-        ICON="audio-volume-muted-symbolic"
-        VOL=0
-        if ! pactl get-sink-mute @DEFAULT_SINK@ | grep '^Mute: yes$' ; then
-            VOL=$(pactl get-sink-volume "$(pactl get-default-sink)" | awk -W posix '/^Volume: / {gsub("%,?", ""); print $5; exit}')
-            ICON=$(get_icon "${VOL}")
-        fi
-        dunstify -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume"
+        VOL=$(get_volume)
+        ICON=$(get_icon "${VOL}")
+        dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume"
         ;;
     *)
         echo "usage: $(basename "$0") up [N] | down [N] | mute"
