@@ -4,6 +4,7 @@ set -euo pipefail
 
 case "${1:-}" in
     light)
+        sed -i 's/^skin=.*$/skin=solarized-light-truecolor/' ~/.config/mc/ini
         sed -i 's/^"\(set background=light\)$/\1/' ~/.vim/vimrc_local
         sed -i 's/^\(set background=dark\)$/"\1/' ~/.vim/vimrc_local
         sed -i 's/"workbench.colorTheme": "Solarized Dark",/"workbench.colorTheme": "Solarized Light",/' ~/.config/Code/User/settings.json
@@ -15,6 +16,7 @@ case "${1:-}" in
         [ -r ~/.config/glow/glow.yml ] && yq -i e '.style = "light"' ~/.config/glow/glow.yml
         ;;
     dark)
+        sed -i 's/^skin=.*$/skin=solarized-dark-truecolor/' ~/.config/mc/ini
         sed -i 's/^"\(set background=dark\)$/\1/' ~/.vim/vimrc_local
         sed -i 's/^\(set background=light\)$/"\1/' ~/.vim/vimrc_local
         sed -i 's/"workbench.colorTheme": "Solarized Light",/"workbench.colorTheme": "Solarized Dark",/' ~/.config/Code/User/settings.json
