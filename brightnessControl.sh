@@ -16,7 +16,8 @@ function get_brightness {
 
 function send_notification {
     icon="display-brightness-symbolic"
-    dunstify -t 1000 -i "$icon" -r 5555 -u normal -h "int:value:$(get_brightness)" "Brightness"
+    msg="Brightness: $(get_brightness | xargs printf '%.f')%"
+    dunstify -t 1000 -i "$icon" -r 5555 -u normal -h "int:value:$(get_brightness)" "${msg}"
 }
 
 case ${1:-} in
