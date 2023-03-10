@@ -26,24 +26,29 @@ TIMEOUT=1000
 
 case ${1:-} in
     up)
-        INC=${2:-5}
-        pactl set-sink-volume @DEFAULT_SINK@ "+${INC}%"
         VOL=$(get_volume)
+        INC=${2:-5}
+        TARGET_VOL=$((VOL + INC))
+        if (( TARGET_VOL > 100 )) ; then
+            TARGET_VOL=100
+        fi
+        pactl set-sink-volume @DEFAULT_SINK@ "${TARGET_VOL}%"
         ICON=$(get_icon "${VOL}")
-        dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume"
+        VOL=$(get_volume)
+        dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume: ${VOL}%"
         ;;
     down)
         INC=${2:-5}
         pactl set-sink-volume @DEFAULT_SINK@ "-${INC}%"
         VOL=$(get_volume)
         ICON=$(get_icon "${VOL}")
-        dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume"
+        dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume: ${VOL}%"
         ;;
     mute)
         pactl set-sink-mute @DEFAULT_SINK@ toggle
         VOL=$(get_volume)
         ICON=$(get_icon "${VOL}")
-        dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume"
+        dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume: ${VOL}%"
         ;;
     *)
         echo "usage: $(basename "$0") up [N] | down [N] | mute"
