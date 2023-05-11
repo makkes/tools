@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+xrandr --listmonitors | tail -n+2 | cut -d" " -f6 | grep -v '^eDP-1$' | xargs -I{} xrandr --output {} --off
+xrandr --output eDP-1 --primary
