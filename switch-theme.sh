@@ -4,6 +4,7 @@ set -euo pipefail
 
 case "${1:-}" in
     light)
+        [ -d ~/.config/kitty ] && ln -sf ~/.config/kitty/themes/Solarized_Light.conf ~/.config/kitty/theme.conf && kill -USR1 $(pidof kitty)
         sed -i 's/^skin=.*$/skin=solarized-light-truecolor/' ~/.config/mc/ini
         sed -i 's/^"\(set background=light\)$/\1/' ~/.vim/vimrc_local
         sed -i 's/^\(set background=dark\)$/"\1/' ~/.vim/vimrc_local
@@ -16,6 +17,7 @@ case "${1:-}" in
         [ -r ~/.config/glow/glow.yml ] && yq -i e '.style = "light"' ~/.config/glow/glow.yml
         ;;
     dark)
+        [ -d ~/.config/kitty ] && ln -sf ~/.config/kitty/themes/Solarized_Dark_-_Patched.conf ~/.config/kitty/theme.conf && kill -USR1 $(pidof kitty)
         sed -i 's/^skin=.*$/skin=solarized-dark-truecolor/' ~/.config/mc/ini
         sed -i 's/^"\(set background=dark\)$/\1/' ~/.vim/vimrc_local
         sed -i 's/^\(set background=light\)$/"\1/' ~/.vim/vimrc_local
