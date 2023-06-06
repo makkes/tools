@@ -9,7 +9,7 @@ case "${1:-}" in
         sed -i 's/^"\(set background=light\)$/\1/' ~/.vim/vimrc_local
         sed -i 's/^\(set background=dark\)$/"\1/' ~/.vim/vimrc_local
         sed -i 's/"workbench.colorTheme": "Solarized Dark",/"workbench.colorTheme": "Solarized Light",/' ~/.config/Code/User/settings.json
-        ln -sf ~/.config/alacritty/themes/solarized_light.yaml ~/.config/alacritty/theme.yml && touch ~/.config/alacritty/alacritty.yml
+        [ -d ~/.config/alacritty ] && ln -sf ~/.config/alacritty/themes/solarized_light.yaml ~/.config/alacritty/theme.yml && touch ~/.config/alacritty/alacritty.yml
         if [ "${2:-}" = "gtk" ] ; then
             sed -i 's/^gtk-application-prefer-dark-theme=1$/gtk-application-prefer-dark-theme=0/' ~/.config/gtk-{3,4}.0/settings.ini
         fi
@@ -22,7 +22,7 @@ case "${1:-}" in
         sed -i 's/^"\(set background=dark\)$/\1/' ~/.vim/vimrc_local
         sed -i 's/^\(set background=light\)$/"\1/' ~/.vim/vimrc_local
         sed -i 's/"workbench.colorTheme": "Solarized Light",/"workbench.colorTheme": "Solarized Dark",/' ~/.config/Code/User/settings.json
-        ln -sf ~/.config/alacritty/themes/solarized_dark.yaml ~/.config/alacritty/theme.yml && touch ~/.config/alacritty/alacritty.yml
+        [ -d ~/.config/alacritty ] && ln -sf ~/.config/alacritty/themes/solarized_dark.yaml ~/.config/alacritty/theme.yml && touch ~/.config/alacritty/alacritty.yml
         if [ "${2:-}" = "gtk" ] ; then
             sed -i 's/^gtk-application-prefer-dark-theme=0$/gtk-application-prefer-dark-theme=1/' ~/.config/gtk-{3,4}.0/settings.ini
         fi
