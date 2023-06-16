@@ -2,24 +2,32 @@
 
 set -euo pipefail
 
+FEEDBACK_SND=/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga
+VOL_LOW_THRESHOLD=20
+VOL_MEDIUM_THRESHOLD=80
+
 function get_volume {
     pactl get-sink-volume "$(pactl get-default-sink)" | awk -W posix '/^Volume: / {gsub("%,?", ""); print $5; exit}'
 }
 
 function get_icon {
-    if pactl get-sink-mute @DEFAULT_SINK@ | grep -q '^Mute: yes$' ; then
+    if is_muted ; then
         echo "audio-volume-muted-symbolic"
         return
     fi
-    if [ "${1:-0}" -le 20 ] ; then
+    if [ "${1:-0}" -le ${VOL_LOW_THRESHOLD} ] ; then
         echo "audio-volume-low-symbolic"
         return
     fi
-    if [ "${1:-0}" -le 80 ] ; then
+    if [ "${1:-0}" -le ${VOL_MEDIUM_THRESHOLD} ] ; then
         echo "audio-volume-medium-symbolic"
         return
     fi
     echo "audio-volume-high-symbolic"
+}
+
+function is_muted {
+    pactl get-sink-mute @DEFAULT_SINK@ | grep -q '^Mute: yes$'
 }
 
 TIMEOUT=1000
@@ -33,9 +41,10 @@ case ${1:-} in
             TARGET_VOL=100
         fi
         pactl set-sink-volume @DEFAULT_SINK@ "${TARGET_VOL}%"
-        ICON=$(get_icon "${VOL}")
         VOL=$(get_volume)
+        ICON=$(get_icon "${VOL}")
         dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume: ${VOL}%"
+        paplay $FEEDBACK_SND
         ;;
     down)
         INC=${2:-5}
@@ -43,12 +52,16 @@ case ${1:-} in
         VOL=$(get_volume)
         ICON=$(get_icon "${VOL}")
         dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume: ${VOL}%"
+        paplay $FEEDBACK_SND
         ;;
     mute)
         pactl set-sink-mute @DEFAULT_SINK@ toggle
         VOL=$(get_volume)
         ICON=$(get_icon "${VOL}")
         dunstify -t "${TIMEOUT}" -i "${ICON}" -r 5752 -u normal -h "int:value:${VOL}" "Volume: ${VOL}%"
+        if ! is_muted ; then
+            paplay $FEEDBACK_SND
+        fi
         ;;
     *)
         echo "usage: $(basename "$0") up [N] | down [N] | mute"
