@@ -36,8 +36,12 @@ while true ; do
             usage
             exit 0
             ;;
+        '--')
+            shift
+            break
+            ;;
         *)
-            echo 'Internal error!' >&2
+            echo "Internal error! $1" >&2
             exit 1
             ;;
     esac
