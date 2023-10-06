@@ -42,7 +42,7 @@ function stationary() {
 
 function mobile() {
     log "configuring mobile mode"
-    xrandr --listmonitors | tail -n+2 | cut -d" " -f6 | grep -v '^eDP-1$' | xargs -I{} xrandr --output {} --off
+    xrandr --listmonitors | tail -n+2 | cut -d" " -f6 | (grep -v '^eDP-1$' || true) | xargs -I{} xrandr --output {} --off
     xrandr --output eDP-1 --primary
     rfkill unblock wifi
     rfkill block bluetooth
