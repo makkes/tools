@@ -11,7 +11,7 @@ function usage() {
     log ""
     log "Switch machine between stationary or mobile mode."
     log ""
-    log "Stationary mode turns off Wifi and configures"
+    log "Stationary mode turns Wifi off, Bluetooth on and configures"
     log "an external monitor."
     log ""
     log "Mobile mode does the opposite."
