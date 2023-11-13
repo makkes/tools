@@ -49,7 +49,7 @@ fi
 
 function prune() {
     local PKG="$1"
-    local VERSION="$2"
+    local VERSION="${2##  }"
     
     echo -n "pruning $PKG $VERSION"
     if [ -n "$DRY_RUN" ] ; then
@@ -62,14 +62,18 @@ function prune() {
 
 PKG=
 VERSION=
+SIZE_BEFORE=$(du -s ~/.asdf|cut -f1)
 while IFS= read -r line ; do
-    if [[ "$line" =~ ^[[:space:]][[:space:]] ]] ; then
+    if [[ "$line" =~ ^[[:space:]][[:space:]\*] ]] ; then
         if [ -n "$VERSION" ] ; then
             prune "$PKG" "$VERSION"
         fi
-        VERSION="${line##  }"
+        VERSION="${line## \*}"
     else
         PKG="$line"
         VERSION=
     fi
-done < <(asdf list)
+done < <(asdf list 2>/dev/null)
+
+SIZE_AFTER=$(du -s ~/.asdf|cut -f1)
+echo "Saved $(echo "(${SIZE_BEFORE}-${SIZE_AFTER})/1024/1024" | bc) GiB"
