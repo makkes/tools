@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+i3-msg '[id="'$(xwininfo | grep 'Window id' | grep -o '0x[^ ]*')'"] focus' && i3-msg sticky toggle
+
