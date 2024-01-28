@@ -26,7 +26,7 @@ MON=$(xrandr -q | grep ' connected ' | cut -d" " -f1 | grep -v '^eDP-1$' | tail 
 
 function fix-workspace-positions() {
     set +e
-    for i in 1 2 3 4 ; do
+    for i in 1 2 3 4 5 ; do
         i3-msg [workspace="^${i}"] move workspace to output primary
     done
     set -e
