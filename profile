@@ -29,6 +29,9 @@ function fix-workspace-positions() {
     for i in 1 2 3 4 5 ; do
         i3-msg [workspace="^${i}"] move workspace to output primary
     done
+    for i in 6 ; do
+        i3-msg [workspace="^${i}"] move workspace to output nonprimary
+    done
     set -e
 }
 
