@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script is meant as a collection of one-liners that I use on a regular basis. Just symlink it using one of the following names for the symlink
 # to get the approriate functionality:
