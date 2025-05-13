@@ -1,0 +1,16 @@
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+nodes:
+- role: control-plane
+  image: kindest/node:v1.33.0@sha256:02f73d6ae3f11ad5d543f16736a2cb2a63a300ad60e81dac22099b0b04784a4e
+  extraMounts:
+  - hostPath: /Users/max/kind/pvcs
+    containerPath: /var/local-path-provisioner
+#  kubeadmConfigPatches:
+#  - |
+#    kind: InitConfiguration
+#    nodeRegistration:
+#      kubeletExtraArgs:
+#        system-reserved: memory=7Gi
+#- role: worker
+#- role: worker
