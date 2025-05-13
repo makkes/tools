@@ -3,20 +3,18 @@ package main
 import (
 	"bufio"
 	"crypto/rsa"
+	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
-	"golang.org/x/xerrors"
-
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func getToken(jwtString string, pubKey *rsa.PublicKey) (*jwt.Token, error) {
-	parser := jwt.Parser{
-		SkipClaimsValidation: true,
-	}
+	parser := jwt.NewParser(
+		jwt.WithoutClaimsValidation(),
+	)
 
 	var keyfunc jwt.Keyfunc
 	if pubKey != nil {
@@ -27,12 +25,19 @@ func getToken(jwtString string, pubKey *rsa.PublicKey) (*jwt.Token, error) {
 
 	token, err := parser.Parse(jwtString, keyfunc)
 	if err != nil {
-		var validationError *jwt.ValidationError
-		if xerrors.As(err, &validationError) {
-			fmt.Printf("Signature NOT verified! ❌\n\n")
+		if errors.Is(err, jwt.ErrTokenUnverifiable) {
+			if keyfunc == nil {
+				fmt.Printf("Signature NOT verified! ❌\n\n")
+				return token, nil
+			} else {
+				return nil, fmt.Errorf("failed verifying token: %w", err)
+			}
+		}
+		if errors.Is(err, jwt.ErrTokenSignatureInvalid) {
+			fmt.Printf("Signature invalid! ❌\n\n")
 			return token, nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("unexpected error parsing token: %w", err)
 	}
 	fmt.Printf("Signature verified ✔️\n\n")
 	return token, nil
@@ -49,7 +54,7 @@ func main() {
 	var pubKeyBytes []byte
 	if len(os.Args) > 2 && os.Args[1] == "-k" {
 		var err error
-		pubKeyBytes, err = ioutil.ReadFile(os.Args[2])
+		pubKeyBytes, err = os.ReadFile(os.Args[2])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error reading public key file: %s. Continuing without signature verification.\n", err)
 		}
@@ -66,7 +71,8 @@ func main() {
 
 	token, err := getToken(tokenString, pubKey)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Failed parsing token: %s", err)
+		os.Exit(1)
 	}
 	if token == nil {
 		fmt.Fprintf(os.Stderr, "Token is invalid.\n")
@@ -81,7 +87,7 @@ func main() {
 
 	fmt.Printf("Claims (")
 	if mapClaims, ok := token.Claims.(jwt.MapClaims); ok {
-		if err := mapClaims.Valid(); err != nil {
+		if err := jwt.NewValidator().Validate(mapClaims); err != nil {
 			fmt.Printf("invalid, %s):\n", err)
 		} else {
 			fmt.Printf("valid):\n")
