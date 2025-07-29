@@ -4,7 +4,7 @@ set +e
 
 case "${1:-}" in
     light)
-        [ -d ~/.config/kitty ] && ln -sf ~/.config/kitty/themes/Solarized_Light.conf ~/.config/kitty/theme.conf && kill -USR1 "$(pidof kitty)"
+        [ -d ~/.config/kitty ] && ln -sf ~/.config/kitty/themes/Solarized_Light.conf ~/.config/kitty/theme.conf && for pid in $(pidof kitty) ; do kill -USR1 "${pid}" ; done
         sed -i 's/^skin=.*$/skin=solarized-light-truecolor/' ~/.config/mc/ini
         sed -i 's/^"\(set background=light\)$/\1/' ~/.vim/vimrc_local
         sed -i 's/^\(set background=dark\)$/"\1/' ~/.vim/vimrc_local
@@ -15,9 +15,10 @@ case "${1:-}" in
         fi
         [ -r ~/.mutt/muttrc ] && sed -i 's/^source ~\/.mutt\/mutt-colors-solarized-dark-16\.muttrc$/source ~\/.mutt\/mutt-colors-solarized-light-16.muttrc/' ~/.mutt/muttrc
         [ -r ~/.config/glow/glow.yml ] && yq -i e '.style = "light"' ~/.config/glow/glow.yml
+        exit 0
         ;;
     dark)
-        [ -d ~/.config/kitty ] && ln -sf ~/.config/kitty/themes/Solarized_Dark_-_Patched.conf ~/.config/kitty/theme.conf && kill -USR1 "$(pidof kitty)"
+        [ -d ~/.config/kitty ] && ln -sf ~/.config/kitty/themes/Solarized_Dark_-_Patched.conf ~/.config/kitty/theme.conf && for pid in $(pidof kitty) ; do kill -USR1 "${pid}" ; done
         sed -i 's/^skin=.*$/skin=solarized-dark-truecolor/' ~/.config/mc/ini
         sed -i 's/^"\(set background=dark\)$/\1/' ~/.vim/vimrc_local
         sed -i 's/^\(set background=light\)$/"\1/' ~/.vim/vimrc_local
@@ -27,7 +28,8 @@ case "${1:-}" in
             sed -i 's/^gtk-application-prefer-dark-theme=0$/gtk-application-prefer-dark-theme=1/' ~/.config/gtk-{3,4}.0/settings.ini
         fi
         sed -i 's/^source ~\/.mutt\/mutt-colors-solarized-light-16\.muttrc$/source ~\/.mutt\/mutt-colors-solarized-dark-16.muttrc/' ~/.mutt/muttrc
-        yq -i e '.style = "dark"' ~/.config/glow/glow.yml
+        [ -r ~/.config/glow/glow.yml ] && yq -i e '.style = "dark"' ~/.config/glow/glow.yml
+        exit 0
         ;;
     ?)
 esac
