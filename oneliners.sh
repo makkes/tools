@@ -18,6 +18,7 @@ elif command -v espeak-ng > /dev/null ; then
 fi
 
 declare -A cmds
+cmds[watch-url]="while true ; do if curl --connect-timeout 5 -sfk ${1:-} > /dev/null ; then date && sleep 3 ; else date && say 'URL not reachable' && while ! curl --connect-timeout 5 -fk ${1:-} ; do sleep 3 ; done ; say 'URL reachable' ; fi ; done"
 cmds[wait-for-docker]="while ! docker ps ; do sleep 1 ; done && ${say} 'docker is running'"
 cmds[open-files-per-command]='IFS=$'"'\n'"'; for i in $(ps -A -o pid= -o command=|sed "s/^ *//") ; do printf "%10s %s\n" $(sudo lsof -p $(echo $i | cut -d" " -f1)|tail -n+2|wc -l) $(echo $i | cut -d" " -f2-) ; done'
 cmds[monitor-connectivity]='while ! ping -c1 google.com ; do sleep 1 ; done && '${say}" 'connectivity established'"
