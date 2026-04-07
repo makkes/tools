@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+kubectl get pods -o json "$@" \
+| jq -r '
+  ["NAMESPACE","POD","STATUS","READY"],
+  (
+    .items[]
+    | select(.status.phase != "Succeeded")
+    | select(
+        .status.phase != "Running"
+        or
+        ([.status.containerStatuses[].ready] | all != true)
+      )
+    | (.status.containerStatuses // []) as $cs
+    | ($cs | map(select(.ready)) | length) as $ready
+    | ($cs | length) as $total
+    | [
+        .metadata.namespace,
+        .metadata.name,
+        .status.phase,
+        "\($ready)/\($total)"
+      ]
+  )
+  | @tsv' \
+| column -t
