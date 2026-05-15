@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [ -z "${1:-}" ] ; then
+    echo "Usage: $0 URL [NAME]"
+    exit 1
+fi
+
+if [ -n "${2:-}" ] ; then
+    NAME="${2}"
+else
+    NAME=$(if ! echo "${1:-}" | grep -q '/' ; then echo "${1:-}" ; else echo "${1:-}"|sed -E 's/^[^/]*\/*([^/:]*).*$/\1/' ; fi)
+fi
+reachable=-1
+while true ; do 
+    date
+    if curl --connect-timeout 5 -sfk "${1:-}" > /dev/null ; then
+        if [[ ${reachable} -lt 1 ]] ; then
+            say "${NAME} reachable"
+            reachable=1
+        fi
+    elif [[ ${reachable} -lt 0 || ${reachable} -eq 1 ]] ; then
+        say "${NAME} not reachable"
+        reachable=0
+    fi
+    sleep 3
+done
