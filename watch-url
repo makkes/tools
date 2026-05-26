@@ -12,9 +12,15 @@ if [ -n "${2:-}" ] ; then
 else
     NAME=$(if ! echo "${1:-}" | grep -q '/' ; then echo "${1:-}" ; else echo "${1:-}"|sed -E 's/^[^/]*\/*([^/:]*).*$/\1/' ; fi)
 fi
+
+declare -A statuses
+statuses[-1]="unknown"
+statuses[0]="unreachable"
+statuses[1]="reachable"
+
 reachable=-1
 while true ; do 
-    date
+    printf "%s - %s - %s\n" "$(date)" "${NAME}" "${statuses[${reachable}]}"
     if curl --connect-timeout 5 -sfk "${1:-}" > /dev/null ; then
         if [[ ${reachable} -lt 1 ]] ; then
             say "${NAME} reachable"
